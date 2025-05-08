@@ -21,10 +21,12 @@ ExecStartPre=-runagent discover-smarthost
 ExecStart=/usr/bin/podman run --conmon-pidfile %t/apcupsd-app.pid \
     --cidfile %t/apcupsd-app.ctr-id --cgroups=no-conmon \
     --pod-id-file %t/apcupsd.pod-id --replace -d --name  apcupsd-app \
-    --volume apcupsd-app:/var/www/html/:Z \
-    --volume ./tmp:/tmp:Z \
-    --env ENV_VAR=test \
-    ${NGINX_IMAGE}
+#    --volume /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
+    --volume apcupsd_config:/etc/apcupsd:Z \
+    --env TZ=Europe/Vienna \
+    --device=/dev/usb/hiddev1 \
+    --restart unless-stopped \
+    ${APCUPSD_IMAGE}
 ExecStop=/usr/bin/podman stop --ignore --cidfile %t/apcupsd-app.ctr-id -t 10
 ExecReload=/usr/bin/podman kill -s HUP apcupsd-app
 SyslogIdentifier=%u
